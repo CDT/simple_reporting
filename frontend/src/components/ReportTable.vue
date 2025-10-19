@@ -1,0 +1,219 @@
+<template>
+  <div class="card">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Query Results</h3>
+      <div class="text-sm text-gray-500">
+        {{ data.length }} row{{ data.length !== 1 ? 's' : '' }}
+      </div>
+    </div>
+
+    <div v-if="data.length === 0" class="text-center py-8 text-gray-500">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <p class="mt-2">No data to display</p>
+    </div>
+
+    <div v-else class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th 
+              v-for="(column, index) in columns" 
+              :key="index"
+              class="cursor-pointer hover:bg-gray-100"
+              @click="sortBy(column)"
+            >
+              <div class="flex items-center space-x-1">
+                <span>{{ formatColumnName(column) }}</span>
+                <div class="flex flex-col">
+                  <svg 
+                    class="w-3 h-3 text-gray-400" 
+                    :class="{ 'text-gray-600': sortColumn === column && sortDirection === 'asc' }"
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                  </svg>
+                  <svg 
+                    class="w-3 h-3 text-gray-400 -mt-1" 
+                    :class="{ 'text-gray-600': sortColumn === column && sortDirection === 'desc' }"
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
+                  </svg>
+                </div>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, rowIndex) in sortedData" :key="rowIndex">
+            <td v-for="(column, colIndex) in columns" :key="colIndex">
+              <span v-if="typeof row[column] === 'number'" class="font-mono">
+                {{ formatNumber(row[column]) }}
+              </span>
+              <span v-else-if="isDate(row[column])" class="text-gray-600">
+                {{ formatDate(row[column]) }}
+              </span>
+              <span v-else>
+                {{ row[column] || '-' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div v-if="data.length > pageSize" class="mt-4 flex items-center justify-between">
+      <div class="text-sm text-gray-700">
+        Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, data.length) }} of {{ data.length }} results
+      </div>
+      <div class="flex space-x-2">
+        <button 
+          @click="currentPage = Math.max(1, currentPage - 1)"
+          :disabled="currentPage === 1"
+          class="btn btn-secondary text-sm px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Previous
+        </button>
+        <span class="px-3 py-1 text-sm text-gray-700">
+          Page {{ currentPage }} of {{ totalPages }}
+        </span>
+        <button 
+          @click="currentPage = Math.min(totalPages, currentPage + 1)"
+          :disabled="currentPage === totalPages"
+          class="btn btn-secondary text-sm px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, computed, watch } from 'vue'
+
+export default {
+  name: 'ReportTable',
+  props: {
+    data: {
+      type: Array,
+      default: () => []
+    },
+    pageSize: {
+      type: Number,
+      default: 50
+    }
+  },
+  setup(props) {
+    const sortColumn = ref(null)
+    const sortDirection = ref('asc')
+    const currentPage = ref(1)
+
+    // Extract columns from data
+    const columns = computed(() => {
+      if (props.data.length === 0) return []
+      return Object.keys(props.data[0])
+    })
+
+    // Sort data
+    const sortedData = computed(() => {
+      if (!sortColumn.value) return paginatedData.value
+
+      return [...paginatedData.value].sort((a, b) => {
+        const aVal = a[sortColumn.value]
+        const bVal = b[sortColumn.value]
+
+        if (aVal === null || aVal === undefined) return 1
+        if (bVal === null || bVal === undefined) return -1
+
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortDirection.value === 'asc' ? aVal - bVal : bVal - aVal
+        }
+
+        const aStr = String(aVal).toLowerCase()
+        const bStr = String(bVal).toLowerCase()
+        
+        if (sortDirection.value === 'asc') {
+          return aStr.localeCompare(bStr)
+        } else {
+          return bStr.localeCompare(aStr)
+        }
+      })
+    })
+
+    // Paginate data
+    const paginatedData = computed(() => {
+      const start = (currentPage.value - 1) * props.pageSize
+      const end = start + props.pageSize
+      return props.data.slice(start, end)
+    })
+
+    // Calculate total pages
+    const totalPages = computed(() => {
+      return Math.ceil(props.data.length / props.pageSize)
+    })
+
+    // Sort by column
+    const sortBy = (column) => {
+      if (sortColumn.value === column) {
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+      } else {
+        sortColumn.value = column
+        sortDirection.value = 'asc'
+      }
+    }
+
+    // Format column name
+    const formatColumnName = (column) => {
+      return column.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    }
+
+    // Format number
+    const formatNumber = (num) => {
+      if (num === null || num === undefined) return '-'
+      if (Number.isInteger(num)) return num.toLocaleString()
+      return num.toLocaleString(undefined, { maximumFractionDigits: 2 })
+    }
+
+    // Check if value is a date
+    const isDate = (value) => {
+      if (!value) return false
+      const date = new Date(value)
+      return !isNaN(date.getTime())
+    }
+
+    // Format date
+    const formatDate = (value) => {
+      if (!value) return '-'
+      const date = new Date(value)
+      return date.toLocaleDateString()
+    }
+
+    // Reset pagination when data changes
+    watch(() => props.data, () => {
+      currentPage.value = 1
+      sortColumn.value = null
+      sortDirection.value = 'asc'
+    })
+
+    return {
+      columns,
+      sortedData,
+      currentPage,
+      totalPages,
+      sortColumn,
+      sortDirection,
+      sortBy,
+      formatColumnName,
+      formatNumber,
+      isDate,
+      formatDate
+    }
+  }
+}
+</script>
