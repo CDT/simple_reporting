@@ -12,14 +12,10 @@
   </svg>
 </template>
 
-<script>
-export default {
-  name: 'BaseIcon',
-  props: {
-    path: {
-      type: String,
-      required: true
-    }
-  }
+<script setup lang="ts">
+interface Props {
+  path: string
 }
+
+defineProps<Props>()
 </script>

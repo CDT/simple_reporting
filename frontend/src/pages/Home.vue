@@ -78,15 +78,6 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { FeatureCard, StepIndicator, CodeBlock } from '../components/ui'
-
-export default {
-  name: 'Home',
-  components: {
-    FeatureCard,
-    StepIndicator,
-    CodeBlock
-  }
-}
 </script>

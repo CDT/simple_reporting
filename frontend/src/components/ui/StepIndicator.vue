@@ -13,38 +13,27 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'StepIndicator',
-  props: {
-    stepNumber: {
-      type: Number,
-      required: true
-    },
-    title: {
-      type: String,
-      required: true
-    },
-    description: {
-      type: String,
-      required: true
-    },
-    color: {
-      type: String,
-      default: 'primary',
-      validator: (value) => ['primary', 'green', 'blue', 'purple'].includes(value)
-    }
-  },
-  computed: {
-    stepClass() {
-      const classes = {
-        primary: 'bg-primary-600',
-        green: 'bg-green-600',
-        blue: 'bg-blue-600',
-        purple: 'bg-purple-600'
-      }
-      return classes[this.color] || classes.primary
-    }
-  }
+<script setup lang="ts">
+import { computed } from 'vue'
+
+interface Props {
+  stepNumber: number
+  title: string
+  description: string
+  color?: 'primary' | 'green' | 'blue' | 'purple'
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  color: 'primary'
+})
+
+const stepClass = computed<string>(() => {
+  const classes: Record<string, string> = {
+    primary: 'bg-primary-600',
+    green: 'bg-green-600',
+    blue: 'bg-blue-600',
+    purple: 'bg-purple-600'
+  }
+  return classes[props.color] || classes.primary
+})
 </script>

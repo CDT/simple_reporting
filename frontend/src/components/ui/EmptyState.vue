@@ -6,36 +6,20 @@
   </div>
 </template>
 
-<script>
-import { ChartIcon, DatabaseIcon, DocumentIcon, UsersIcon } from './icons'
+<script setup lang="ts">
+import { useIcon } from '../../composables/useIcon'
 
-export default {
-  name: 'EmptyState',
-  components: {
-    ChartIcon,
-    DatabaseIcon,
-    DocumentIcon,
-    UsersIcon
-  },
-  props: {
-    title: {
-      type: String,
-      required: true
-    },
-    description: {
-      type: String,
-      default: ''
-    },
-    icon: {
-      type: String,
-      default: 'chart',
-      validator: (value) => ['chart', 'database', 'document', 'users'].includes(value)
-    }
-  },
-  computed: {
-    iconComponent() {
-      return `${this.icon.charAt(0).toUpperCase() + this.icon.slice(1)}Icon`
-    }
-  }
+interface Props {
+  title: string
+  description?: string
+  icon?: 'chart' | 'database' | 'document' | 'users'
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  description: '',
+  icon: 'chart'
+})
+
+// Use the icon utility
+const iconComponent = useIcon(props.icon)
 </script>

@@ -2,18 +2,8 @@
   <BaseIcon :path="path" />
 </template>
 
-<script>
+<script setup lang="ts">
 import BaseIcon from './BaseIcon.vue'
 
-export default {
-  name: 'TableIcon',
-  components: {
-    BaseIcon
-  },
-  data() {
-    return {
-      path: 'M4 6h16M4 10h16M4 14h16M4 18h16'
-    }
-  }
-}
+const path = 'M4 6h16M4 10h16M4 14h16M4 18h16'
 </script>

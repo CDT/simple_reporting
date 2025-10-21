@@ -22,118 +22,97 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import axios from 'axios'
 import { DownloadIcon, FormattedExportIcon } from './ui/icons'
 
-export default {
-  name: 'ExportButton',
-  components: {
-    DownloadIcon,
-    FormattedExportIcon
-  },
-  props: {
-    sql: {
-      type: String,
-      required: true
-    },
-    params: {
-      type: Array,
-      default: () => []
-    },
-    filename: {
-      type: String,
-      default: 'report'
-    },
-    data: {
-      type: Array,
-      default: () => []
-    }
-  },
-  setup(props) {
-    const isExporting = ref(false)
+interface Props {
+  sql: string
+  params?: any[]
+  filename?: string
+  data?: any[]
+}
 
-    const hasData = computed(() => {
-      return props.data && props.data.length > 0
+const props = withDefaults(defineProps<Props>(), {
+  params: () => [],
+  filename: 'report',
+  data: () => []
+})
+
+const isExporting = ref<boolean>(false)
+
+const hasData = computed<boolean>(() => {
+  return props.data && props.data.length > 0
+})
+
+const exportToExcel = async (): Promise<void> => {
+  if (!props.sql) {
+    alert('No SQL query provided')
+    return
+  }
+
+  isExporting.value = true
+
+  try {
+    const response = await axios.post('/api/export/excel', {
+      sql: props.sql,
+      params: props.params,
+      filename: props.filename
+    }, {
+      responseType: 'blob'
     })
 
-    const exportToExcel = async () => {
-      if (!props.sql) {
-        alert('No SQL query provided')
-        return
-      }
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `${props.filename}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
 
-      isExporting.value = true
+  } catch (error) {
+    console.error('Export error:', error)
+    alert('Export failed: ' + ((error as any).response?.data?.message || (error as Error).message))
+  } finally {
+    isExporting.value = false
+  }
+}
 
-      try {
-        const response = await axios.post('/api/export/excel', {
-          sql: props.sql,
-          params: props.params,
-          filename: props.filename
-        }, {
-          responseType: 'blob'
-        })
+const exportFormatted = async (): Promise<void> => {
+  if (!props.sql) {
+    alert('No SQL query provided')
+    return
+  }
 
-        // Create download link
-        const url = window.URL.createObjectURL(new Blob([response.data]))
-        const link = document.createElement('a')
-        link.href = url
-        link.setAttribute('download', `${props.filename}.xlsx`)
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-        window.URL.revokeObjectURL(url)
+  isExporting.value = true
 
-      } catch (error) {
-        console.error('Export error:', error)
-        alert('Export failed: ' + (error.response?.data?.message || error.message))
-      } finally {
-        isExporting.value = false
-      }
-    }
+  try {
+    const response = await axios.post('/api/export/excel/formatted', {
+      sql: props.sql,
+      params: props.params,
+      filename: props.filename
+    }, {
+      responseType: 'blob'
+    })
 
-    const exportFormatted = async () => {
-      if (!props.sql) {
-        alert('No SQL query provided')
-        return
-      }
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `${props.filename}_formatted.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
 
-      isExporting.value = true
-
-      try {
-        const response = await axios.post('/api/export/excel/formatted', {
-          sql: props.sql,
-          params: props.params,
-          filename: props.filename
-        }, {
-          responseType: 'blob'
-        })
-
-        // Create download link
-        const url = window.URL.createObjectURL(new Blob([response.data]))
-        const link = document.createElement('a')
-        link.href = url
-        link.setAttribute('download', `${props.filename}_formatted.xlsx`)
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-        window.URL.revokeObjectURL(url)
-
-      } catch (error) {
-        console.error('Formatted export error:', error)
-        alert('Export failed: ' + (error.response?.data?.message || error.message))
-      } finally {
-        isExporting.value = false
-      }
-    }
-
-    return {
-      isExporting,
-      hasData,
-      exportToExcel,
-      exportFormatted
-    }
+  } catch (error) {
+    console.error('Formatted export error:', error)
+    alert('Export failed: ' + ((error as any).response?.data?.message || (error as Error).message))
+  } finally {
+    isExporting.value = false
   }
 }
 </script>

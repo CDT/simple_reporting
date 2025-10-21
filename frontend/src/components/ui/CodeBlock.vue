@@ -7,18 +7,13 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'CodeBlock',
-  props: {
-    code: {
-      type: String,
-      required: true
-    },
-    title: {
-      type: String,
-      default: ''
-    }
-  }
+<script setup lang="ts">
+interface Props {
+  code: string
+  title?: string
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  title: ''
+})
 </script>

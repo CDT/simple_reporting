@@ -85,132 +85,108 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { EmptyState, ChevronUpIcon, ChevronDownIcon } from './ui'
 
-export default {
-  name: 'ReportTable',
-  components: {
-    EmptyState,
-    ChevronUpIcon,
-    ChevronDownIcon
-  },
-  props: {
-    data: {
-      type: Array,
-      default: () => []
-    },
-    pageSize: {
-      type: Number,
-      default: 50
-    }
-  },
-  setup(props) {
-    const sortColumn = ref(null)
-    const sortDirection = ref('asc')
-    const currentPage = ref(1)
+interface Props {
+  data: any[]
+  pageSize?: number
+}
 
-    // Extract columns from data
-    const columns = computed(() => {
-      if (props.data.length === 0) return []
-      return Object.keys(props.data[0])
-    })
+const props = withDefaults(defineProps<Props>(), {
+  data: () => [],
+  pageSize: 50
+})
 
-    // Sort data
-    const sortedData = computed(() => {
-      if (!sortColumn.value) return paginatedData.value
+const sortColumn = ref<string | null>(null)
+const sortDirection = ref<'asc' | 'desc'>('asc')
+const currentPage = ref<number>(1)
 
-      return [...paginatedData.value].sort((a, b) => {
-        const aVal = a[sortColumn.value]
-        const bVal = b[sortColumn.value]
+// Extract columns from data
+const columns = computed<string[]>(() => {
+  if (props.data.length === 0) return []
+  return Object.keys(props.data[0])
+})
 
-        if (aVal === null || aVal === undefined) return 1
-        if (bVal === null || bVal === undefined) return -1
+// Sort data
+const sortedData = computed<any[]>(() => {
+  if (!sortColumn.value) return paginatedData.value
 
-        if (typeof aVal === 'number' && typeof bVal === 'number') {
-          return sortDirection.value === 'asc' ? aVal - bVal : bVal - aVal
-        }
+  return [...paginatedData.value].sort((a, b) => {
+    const aVal = a[sortColumn.value!]
+    const bVal = b[sortColumn.value!]
 
-        const aStr = String(aVal).toLowerCase()
-        const bStr = String(bVal).toLowerCase()
-        
-        if (sortDirection.value === 'asc') {
-          return aStr.localeCompare(bStr)
-        } else {
-          return bStr.localeCompare(aStr)
-        }
-      })
-    })
+    if (aVal === null || aVal === undefined) return 1
+    if (bVal === null || bVal === undefined) return -1
 
-    // Paginate data
-    const paginatedData = computed(() => {
-      const start = (currentPage.value - 1) * props.pageSize
-      const end = start + props.pageSize
-      return props.data.slice(start, end)
-    })
-
-    // Calculate total pages
-    const totalPages = computed(() => {
-      return Math.ceil(props.data.length / props.pageSize)
-    })
-
-    // Sort by column
-    const sortBy = (column) => {
-      if (sortColumn.value === column) {
-        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-      } else {
-        sortColumn.value = column
-        sortDirection.value = 'asc'
-      }
+    if (typeof aVal === 'number' && typeof bVal === 'number') {
+      return sortDirection.value === 'asc' ? aVal - bVal : bVal - aVal
     }
 
-    // Format column name
-    const formatColumnName = (column) => {
-      return column.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    const aStr = String(aVal).toLowerCase()
+    const bStr = String(bVal).toLowerCase()
+    
+    if (sortDirection.value === 'asc') {
+      return aStr.localeCompare(bStr)
+    } else {
+      return bStr.localeCompare(aStr)
     }
+  })
+})
 
-    // Format number
-    const formatNumber = (num) => {
-      if (num === null || num === undefined) return '-'
-      if (Number.isInteger(num)) return num.toLocaleString()
-      return num.toLocaleString(undefined, { maximumFractionDigits: 2 })
-    }
+// Paginate data
+const paginatedData = computed<any[]>(() => {
+  const start = (currentPage.value - 1) * props.pageSize
+  const end = start + props.pageSize
+  return props.data.slice(start, end)
+})
 
-    // Check if value is a date
-    const isDate = (value) => {
-      if (!value) return false
-      const date = new Date(value)
-      return !isNaN(date.getTime())
-    }
+// Calculate total pages
+const totalPages = computed<number>(() => {
+  return Math.ceil(props.data.length / props.pageSize)
+})
 
-    // Format date
-    const formatDate = (value) => {
-      if (!value) return '-'
-      const date = new Date(value)
-      return date.toLocaleDateString()
-    }
-
-    // Reset pagination when data changes
-    watch(() => props.data, () => {
-      currentPage.value = 1
-      sortColumn.value = null
-      sortDirection.value = 'asc'
-    })
-
-    return {
-      columns,
-      sortedData,
-      currentPage,
-      totalPages,
-      sortColumn,
-      sortDirection,
-      sortBy,
-      formatColumnName,
-      formatNumber,
-      isDate,
-      formatDate
-    }
+// Sort by column
+const sortBy = (column: string): void => {
+  if (sortColumn.value === column) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortColumn.value = column
+    sortDirection.value = 'asc'
   }
 }
+
+// Format column name
+const formatColumnName = (column: string): string => {
+  return column.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+}
+
+// Format number
+const formatNumber = (num: number | null | undefined): string => {
+  if (num === null || num === undefined) return '-'
+  if (Number.isInteger(num)) return num.toLocaleString()
+  return num.toLocaleString(undefined, { maximumFractionDigits: 2 })
+}
+
+// Check if value is a date
+const isDate = (value: any): boolean => {
+  if (!value) return false
+  const date = new Date(value)
+  return !isNaN(date.getTime())
+}
+
+// Format date
+const formatDate = (value: any): string => {
+  if (!value) return '-'
+  const date = new Date(value)
+  return date.toLocaleDateString()
+}
+
+// Reset pagination when data changes
+watch(() => props.data, () => {
+  currentPage.value = 1
+  sortColumn.value = null
+  sortDirection.value = 'asc'
+})
 </script>

@@ -9,45 +9,22 @@
   </router-link>
 </template>
 
-<script>
-import { HomeIcon, ChartIcon, SettingsIcon, UserIcon, DatabaseIcon } from '../ui/icons'
+<script setup lang="ts">
+import { useIcon } from '../../composables/useIcon'
 
-export default {
-  name: 'NavLink',
-  components: {
-    HomeIcon,
-    ChartIcon,
-    SettingsIcon,
-    UserIcon,
-    DatabaseIcon
-  },
-  computed: {
-    iconComponent() {
-      return this.icon ? `${this.icon.charAt(0).toUpperCase() + this.icon.slice(1)}Icon` : null
-    }
-  },
-  props: {
-    to: {
-      type: String,
-      required: true
-    },
-    name: {
-      type: String,
-      required: true
-    },
-    label: {
-      type: String,
-      required: true
-    },
-    icon: {
-      type: String,
-      default: '',
-      validator: (value) => ['', 'home', 'chart', 'settings', 'user', 'database'].includes(value)
-    },
-    isActive: {
-      type: Boolean,
-      default: false
-    }
-  }
+interface Props {
+  to: string
+  name: string
+  label: string
+  icon?: string
+  isActive?: boolean
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  icon: '',
+  isActive: false
+})
+
+// Use the icon utility
+const iconComponent = useIcon(props.icon)
 </script>

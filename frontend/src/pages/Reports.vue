@@ -46,30 +46,35 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref } from 'vue'
 import QueryEditor from '../components/QueryEditor.vue'
 import ReportTable from '../components/ReportTable.vue'
 import ExportButton from '../components/ExportButton.vue'
 
-export default {
-  name: 'Reports',
-  components: {
-    QueryEditor,
-    ReportTable,
-    ExportButton
-  },
-  setup() {
-    const queryData = ref([])
-    const currentSql = ref('')
-    const currentParams = ref([])
+interface QueryResult {
+  data: any[]
+  sql: string
+  params: any[]
+}
 
-    const reportTemplates = ref([
-      {
-        id: 1,
-        name: 'Employee Directory',
-        description: 'Complete list of all employees with their details',
-        sql: `SELECT 
+interface ReportTemplate {
+  id: number
+  name: string
+  description: string
+  sql: string
+}
+
+const queryData = ref<any[]>([])
+const currentSql = ref<string>('')
+const currentParams = ref<any[]>([])
+
+const reportTemplates = ref<ReportTemplate[]>([
+  {
+    id: 1,
+    name: 'Employee Directory',
+    description: 'Complete list of all employees with their details',
+    sql: `SELECT 
   e.first_name,
   e.last_name,
   e.email,
@@ -80,12 +85,12 @@ export default {
 FROM employees e
 LEFT JOIN departments d ON e.department_id = d.id
 ORDER BY e.last_name, e.first_name`
-      },
-      {
-        id: 2,
-        name: 'Sales Summary by Product',
-        description: 'Total sales grouped by product with quantities and revenue',
-        sql: `SELECT 
+  },
+  {
+    id: 2,
+    name: 'Sales Summary by Product',
+    description: 'Total sales grouped by product with quantities and revenue',
+    sql: `SELECT 
   s.product_name,
   SUM(s.quantity) as total_quantity,
   SUM(s.quantity * s.unit_price) as total_revenue,
@@ -94,12 +99,12 @@ ORDER BY e.last_name, e.first_name`
 FROM sales s
 GROUP BY s.product_name
 ORDER BY total_revenue DESC`
-      },
-      {
-        id: 3,
-        name: 'Department Performance',
-        description: 'Department budgets, employee counts, and average salaries',
-        sql: `SELECT 
+  },
+  {
+    id: 3,
+    name: 'Department Performance',
+    description: 'Department budgets, employee counts, and average salaries',
+    sql: `SELECT 
   d.name as department,
   d.location,
   d.budget,
@@ -110,12 +115,12 @@ FROM departments d
 LEFT JOIN employees e ON d.id = e.department_id
 GROUP BY d.id, d.name, d.location, d.budget
 ORDER BY d.name`
-      },
-      {
-        id: 4,
-        name: 'Top Performers',
-        description: 'Employees with highest sales performance',
-        sql: `SELECT 
+  },
+  {
+    id: 4,
+    name: 'Top Performers',
+    description: 'Employees with highest sales performance',
+    sql: `SELECT 
   e.first_name,
   e.last_name,
   e.email,
@@ -128,12 +133,12 @@ GROUP BY e.id, e.first_name, e.last_name, e.email
 HAVING total_sales > 0
 ORDER BY total_sales DESC
 LIMIT 10`
-      },
-      {
-        id: 5,
-        name: 'Monthly Sales Trend',
-        description: 'Sales performance by month',
-        sql: `SELECT 
+  },
+  {
+    id: 5,
+    name: 'Monthly Sales Trend',
+    description: 'Sales performance by month',
+    sql: `SELECT 
   strftime('%Y-%m', sale_date) as month,
   COUNT(*) as sale_count,
   SUM(quantity) as total_quantity,
@@ -141,12 +146,12 @@ LIMIT 10`
 FROM sales
 GROUP BY strftime('%Y-%m', sale_date)
 ORDER BY month`
-      },
-      {
-        id: 6,
-        name: 'Salary Analysis',
-        description: 'Salary statistics by department',
-        sql: `SELECT 
+  },
+  {
+    id: 6,
+    name: 'Salary Analysis',
+    description: 'Salary statistics by department',
+    sql: `SELECT 
   d.name as department,
   COUNT(e.id) as employee_count,
   MIN(e.salary) as min_salary,
@@ -158,30 +163,19 @@ LEFT JOIN employees e ON d.id = e.department_id
 WHERE e.salary IS NOT NULL
 GROUP BY d.id, d.name
 ORDER BY avg_salary DESC`
-      }
-    ])
-
-    const handleQueryExecuted = (result) => {
-      queryData.value = result.data
-      currentSql.value = result.sql
-      currentParams.value = result.params
-    }
-
-    const loadTemplate = (template) => {
-      // This would need to be implemented in QueryEditor component
-      // For now, we'll just show the SQL in console
-      console.log('Loading template:', template)
-      // You could emit an event to QueryEditor to set the SQL
-    }
-
-    return {
-      queryData,
-      currentSql,
-      currentParams,
-      reportTemplates,
-      handleQueryExecuted,
-      loadTemplate
-    }
   }
+])
+
+const handleQueryExecuted = (result: QueryResult) => {
+  queryData.value = result.data
+  currentSql.value = result.sql
+  currentParams.value = result.params
+}
+
+const loadTemplate = (template: ReportTemplate) => {
+  // This would need to be implemented in QueryEditor component
+  // For now, we'll just show the SQL in console
+  console.log('Loading template:', template)
+  // You could emit an event to QueryEditor to set the SQL
 }
 </script>

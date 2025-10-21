@@ -47,48 +47,37 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'FormField',
-  props: {
-    modelValue: {
-      type: [String, Number],
-      default: ''
-    },
-    type: {
-      type: String,
-      default: 'text',
-      validator: (value) => ['text', 'email', 'password', 'number', 'textarea', 'select'].includes(value)
-    },
-    label: {
-      type: String,
-      default: ''
-    },
-    placeholder: {
-      type: String,
-      default: ''
-    },
-    helpText: {
-      type: String,
-      default: ''
-    },
-    required: {
-      type: Boolean,
-      default: false
-    },
-    disabled: {
-      type: Boolean,
-      default: false
-    },
-    rows: {
-      type: Number,
-      default: 3
-    },
-    options: {
-      type: Array,
-      default: () => []
-    }
-  },
-  emits: ['update:modelValue']
+<script setup lang="ts">
+interface Option {
+  value: string | number
+  label: string
 }
+
+interface Props {
+  modelValue?: string | number
+  type?: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select'
+  label?: string
+  placeholder?: string
+  helpText?: string
+  required?: boolean
+  disabled?: boolean
+  rows?: number
+  options?: Option[]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: '',
+  type: 'text',
+  label: '',
+  placeholder: '',
+  helpText: '',
+  required: false,
+  disabled: false,
+  rows: 3,
+  options: () => []
+})
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string | number]
+}>()
 </script>

@@ -19,44 +19,35 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed } from 'vue'
 import { CloseIcon } from './icons'
 
-export default {
-  name: 'Modal',
-  components: {
-    CloseIcon
-  },
-  props: {
-    show: {
-      type: Boolean,
-      default: false
-    },
-    title: {
-      type: String,
-      default: ''
-    },
-    size: {
-      type: String,
-      default: 'md',
-      validator: (value) => ['sm', 'md', 'lg', 'xl'].includes(value)
-    },
-    closable: {
-      type: Boolean,
-      default: true
-    }
-  },
-  emits: ['close'],
-  computed: {
-    modalClass() {
-      const classes = {
-        sm: 'max-w-sm',
-        md: 'max-w-md',
-        lg: 'max-w-lg',
-        xl: 'max-w-xl'
-      }
-      return classes[this.size] || classes.md
-    }
-  }
+interface Props {
+  show?: boolean
+  title?: string
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  closable?: boolean
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  show: false,
+  title: '',
+  size: 'md',
+  closable: true
+})
+
+const emit = defineEmits<{
+  close: []
+}>()
+
+const modalClass = computed<string>(() => {
+  const classes: Record<string, string> = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl'
+  }
+  return classes[props.size] || classes.md
+})
 </script>

@@ -104,153 +104,147 @@
   </div>
 </template>
 
-<script>
-import { ref, computed, inject, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, computed, inject, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { StatusIndicator, AlertMessage } from './ui'
 
-export default {
-  name: 'QueryEditor',
-  components: {
-    StatusIndicator,
-    AlertMessage
-  },
-  emits: ['query-executed'],
-  setup(props, { emit }) {
-    const sql = ref('')
-    const parameters = ref([])
-    const paramValues = ref([])
-    const tables = ref([])
-    const error = ref('')
-    const successMessage = ref('')
-    const isLoading = ref(false)
-    const activeConnection = ref(null)
+interface Connection {
+  id: number
+  name: string
+  type: string
+  isActive: boolean
+}
 
-    const setLoading = inject('setLoading')
+interface QueryResult {
+  data: any[]
+  sql: string
+  params: any[]
+}
 
-    // Extract parameters from SQL
-    const extractParameters = (sqlText) => {
-      const paramRegex = /\?/g
-      const matches = sqlText.match(paramRegex)
-      return matches ? Array(matches.length).fill('') : []
-    }
+const emit = defineEmits<{
+  'query-executed': [result: QueryResult]
+}>()
 
-    // Watch SQL changes to update parameters
-    const updateParameters = () => {
-      parameters.value = extractParameters(sql.value)
-      paramValues.value = Array(parameters.value.length).fill('')
-    }
+const sql = ref<string>('')
+const parameters = ref<string[]>([])
+const paramValues = ref<string[]>([])
+const tables = ref<string[]>([])
+const error = ref<string>('')
+const successMessage = ref<string>('')
+const isLoading = ref<boolean>(false)
+const activeConnection = ref<Connection | null>(null)
 
-    // Load available tables
-    const loadTables = async () => {
-      if (!activeConnection.value) {
-        error.value = 'No active connection. Please configure a connection in Settings.'
-        return
-      }
+const setLoading = inject<(loading: boolean) => void>('setLoading')
 
-      try {
-        const response = await axios.get('/api/query/tables')
-        if (response.data.success) {
-          tables.value = response.data.tables
-          error.value = ''
-        }
-      } catch (err) {
-        console.error('Error loading tables:', err)
-        error.value = err.response?.data?.message || 'Failed to load tables'
-      }
-    }
+// Extract parameters from SQL
+const extractParameters = (sqlText: string): string[] => {
+  const paramRegex = /\?/g
+  const matches = sqlText.match(paramRegex)
+  return matches ? Array(matches.length).fill('') : []
+}
 
-    // Insert table name into SQL
-    const insertTableName = (tableName) => {
-      const textarea = document.querySelector('textarea')
-      const start = textarea.selectionStart
-      const end = textarea.selectionEnd
-      const before = sql.value.substring(0, start)
-      const after = sql.value.substring(end)
-      sql.value = before + tableName + after
-      
-      // Set cursor position after inserted text
-      setTimeout(() => {
-        textarea.focus()
-        textarea.setSelectionRange(start + tableName.length, start + tableName.length)
-      }, 0)
-    }
+// Watch SQL changes to update parameters
+const updateParameters = (): void => {
+  parameters.value = extractParameters(sql.value)
+  paramValues.value = Array(parameters.value.length).fill('')
+}
 
-    // Execute query
-    const executeQuery = async () => {
-      if (!sql.value.trim()) {
-        error.value = 'Please enter a SQL query'
-        return
-      }
+// Load available tables
+const loadTables = async (): Promise<void> => {
+  if (!activeConnection.value) {
+    error.value = 'No active connection. Please configure a connection in Settings.'
+    return
+  }
 
-      isLoading.value = true
-      setLoading(true)
+  try {
+    const response = await axios.get('/api/query/tables')
+    if (response.data.success) {
+      tables.value = response.data.tables
       error.value = ''
-      successMessage.value = ''
-
-      try {
-        const response = await axios.post('/api/query', {
-          sql: sql.value,
-          params: paramValues.value.filter(val => val !== '')
-        })
-
-        if (response.data.success) {
-          successMessage.value = `Query executed successfully. ${response.data.rowCount} rows returned.`
-          emit('query-executed', {
-            data: response.data.data,
-            sql: sql.value,
-            params: paramValues.value.filter(val => val !== '')
-          })
-        } else {
-          error.value = response.data.message || 'Query execution failed'
-        }
-      } catch (err) {
-        console.error('Query execution error:', err)
-        error.value = err.response?.data?.message || err.message || 'Query execution failed'
-      } finally {
-        isLoading.value = false
-        setLoading(false)
-      }
     }
-
-    // Load active connection
-    const loadActiveConnection = async () => {
-      try {
-        const response = await axios.get('/api/connections')
-        if (response.data.success) {
-          const connections = response.data.connections
-          activeConnection.value = connections.find(c => c.isActive) || null
-        }
-      } catch (err) {
-        console.error('Error loading active connection:', err)
-      }
-    }
-
-    // Load tables on component mount
-    onMounted(() => {
-      loadActiveConnection()
-      loadTables()
-    })
-
-    return {
-      sql,
-      parameters,
-      paramValues,
-      tables,
-      error,
-      successMessage,
-      isLoading,
-      activeConnection,
-      loadTables,
-      insertTableName,
-      executeQuery,
-      updateParameters
-    }
-  },
-  watch: {
-    sql() {
-      this.updateParameters()
-    }
+  } catch (err) {
+    console.error('Error loading tables:', err)
+    error.value = (err as any).response?.data?.message || 'Failed to load tables'
   }
 }
+
+// Insert table name into SQL
+const insertTableName = (tableName: string): void => {
+  const textarea = document.querySelector('textarea') as HTMLTextAreaElement
+  if (!textarea) return
+  
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  const before = sql.value.substring(0, start)
+  const after = sql.value.substring(end)
+  sql.value = before + tableName + after
+  
+  // Set cursor position after inserted text
+  setTimeout(() => {
+    textarea.focus()
+    textarea.setSelectionRange(start + tableName.length, start + tableName.length)
+  }, 0)
+}
+
+// Execute query
+const executeQuery = async (): Promise<void> => {
+  if (!sql.value.trim()) {
+    error.value = 'Please enter a SQL query'
+    return
+  }
+
+  isLoading.value = true
+  setLoading?.(true)
+  error.value = ''
+  successMessage.value = ''
+
+  try {
+    const response = await axios.post('/api/query', {
+      sql: sql.value,
+      params: paramValues.value.filter(val => val !== '')
+    })
+
+    if (response.data.success) {
+      successMessage.value = `Query executed successfully. ${response.data.rowCount} rows returned.`
+      emit('query-executed', {
+        data: response.data.data,
+        sql: sql.value,
+        params: paramValues.value.filter(val => val !== '')
+      })
+    } else {
+      error.value = response.data.message || 'Query execution failed'
+    }
+  } catch (err) {
+    console.error('Query execution error:', err)
+    error.value = (err as any).response?.data?.message || (err as Error).message || 'Query execution failed'
+  } finally {
+    isLoading.value = false
+    setLoading?.(false)
+  }
+}
+
+// Load active connection
+const loadActiveConnection = async (): Promise<void> => {
+  try {
+    const response = await axios.get('/api/connections')
+    if (response.data.success) {
+      const connections: Connection[] = response.data.connections
+      activeConnection.value = connections.find(c => c.isActive) || null
+    }
+  } catch (err) {
+    console.error('Error loading active connection:', err)
+  }
+}
+
+// Watch SQL changes to update parameters
+watch(sql, () => {
+  updateParameters()
+})
+
+// Load tables on component mount
+onMounted(() => {
+  loadActiveConnection()
+  loadTables()
+})
 </script>

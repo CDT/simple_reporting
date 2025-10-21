@@ -2,18 +2,8 @@
   <BaseIcon :path="path" />
 </template>
 
-<script>
+<script setup lang="ts">
 import BaseIcon from './BaseIcon.vue'
 
-export default {
-  name: 'UsersIcon',
-  components: {
-    BaseIcon
-  },
-  data() {
-    return {
-      path: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a4 4 0 11-8 0 4 4 0 018 0z'
-    }
-  }
-}
+const path = 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a4 4 0 11-8 0 4 4 0 018 0z'
 </script>

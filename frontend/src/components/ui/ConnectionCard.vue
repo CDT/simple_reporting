@@ -48,51 +48,53 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { computed } from 'vue'
 import { DatabaseIcon } from './icons'
 
-export default {
-  name: 'ConnectionCard',
-  components: {
-    DatabaseIcon
-  },
-  props: {
-    connection: {
-      type: Object,
-      required: true
-    },
-    testing: {
-      type: Boolean,
-      default: false
-    },
-    showTestButton: {
-      type: Boolean,
-      default: true
-    },
-    showEditButton: {
-      type: Boolean,
-      default: true
-    },
-    showDeleteButton: {
-      type: Boolean,
-      default: true
-    }
-  },
-  emits: ['test', 'edit', 'delete'],
-  computed: {
-    iconClass() {
-      const classes = {
-        oracle: 'bg-red-100 text-red-600',
-        sqlserver: 'bg-blue-100 text-blue-600',
-        postgres: 'bg-indigo-100 text-indigo-600'
-      }
-      return classes[this.connection.type] || classes.postgres
-    },
-    statusClass() {
-      return this.connection.isActive 
-        ? 'bg-green-100 text-green-800' 
-        : 'bg-gray-100 text-gray-800'
-    }
-  }
+interface Connection {
+  id: number
+  name: string
+  type: string
+  host: string
+  port: string
+  database: string
+  isActive: boolean
 }
+
+interface Props {
+  connection: Connection
+  testing?: boolean
+  showTestButton?: boolean
+  showEditButton?: boolean
+  showDeleteButton?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  testing: false,
+  showTestButton: true,
+  showEditButton: true,
+  showDeleteButton: true
+})
+
+const emit = defineEmits<{
+  test: [connection: Connection]
+  edit: [connection: Connection]
+  delete: [id: number]
+}>()
+
+const iconClass = computed<string>(() => {
+  const classes: Record<string, string> = {
+    oracle: 'bg-red-100 text-red-600',
+    sqlserver: 'bg-blue-100 text-blue-600',
+    postgres: 'bg-indigo-100 text-indigo-600'
+  }
+  return classes[props.connection.type] || classes.postgres
+})
+
+const statusClass = computed<string>(() => {
+  return props.connection.isActive 
+    ? 'bg-green-100 text-green-800' 
+    : 'bg-gray-100 text-gray-800'
+})
 </script>

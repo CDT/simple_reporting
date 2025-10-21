@@ -7,18 +7,14 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'LoadingSpinner',
-  props: {
-    show: {
-      type: Boolean,
-      default: false
-    },
-    message: {
-      type: String,
-      default: 'Loading...'
-    }
-  }
+<script setup lang="ts">
+interface Props {
+  show?: boolean
+  message?: string
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  show: false,
+  message: 'Loading...'
+})
 </script>

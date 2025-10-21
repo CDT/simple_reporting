@@ -11,54 +11,40 @@
   </div>
 </template>
 
-<script>
-import { SuccessIcon, ErrorIcon, WarningIcon, InfoIcon } from './icons'
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useIcon } from '../../composables/useIcon'
 
-export default {
-  name: 'AlertMessage',
-  components: {
-    SuccessIcon,
-    ErrorIcon,
-    WarningIcon,
-    InfoIcon
-  },
-  props: {
-    type: {
-      type: String,
-      required: true,
-      validator: (value) => ['success', 'error', 'warning', 'info'].includes(value)
-    },
-    message: {
-      type: String,
-      required: true
-    },
-    show: {
-      type: Boolean,
-      default: true
-    }
-  },
-  computed: {
-    alertClass() {
-      const classes = {
-        success: 'bg-green-50 border-green-200',
-        error: 'bg-red-50 border-red-200',
-        warning: 'bg-yellow-50 border-yellow-200',
-        info: 'bg-blue-50 border-blue-200'
-      }
-      return classes[this.type] || classes.info
-    },
-    textClass() {
-      const classes = {
-        success: 'text-green-700',
-        error: 'text-red-700',
-        warning: 'text-yellow-700',
-        info: 'text-blue-700'
-      }
-      return classes[this.type] || classes.info
-    },
-    iconComponent() {
-      return `${this.type.charAt(0).toUpperCase() + this.type.slice(1)}Icon`
-    }
-  }
+interface Props {
+  type: 'success' | 'error' | 'warning' | 'info'
+  message: string
+  show?: boolean
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  show: true
+})
+
+const alertClass = computed<string>(() => {
+  const classes: Record<string, string> = {
+    success: 'bg-green-50 border-green-200',
+    error: 'bg-red-50 border-red-200',
+    warning: 'bg-yellow-50 border-yellow-200',
+    info: 'bg-blue-50 border-blue-200'
+  }
+  return classes[props.type] || classes.info
+})
+
+const textClass = computed<string>(() => {
+  const classes: Record<string, string> = {
+    success: 'text-green-700',
+    error: 'text-red-700',
+    warning: 'text-yellow-700',
+    info: 'text-blue-700'
+  }
+  return classes[props.type] || classes.info
+})
+
+// Use the icon utility
+const iconComponent = useIcon(props.type)
 </script>

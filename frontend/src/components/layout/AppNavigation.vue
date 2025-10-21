@@ -26,42 +26,42 @@
   </nav>
 </template>
 
-<script>
+<script setup lang="ts">
 import NavLink from './NavLink.vue'
 
-export default {
-  name: 'AppNavigation',
-  components: {
-    NavLink
-  },
-  props: {
-    brandName: {
-      type: String,
-      default: 'Simple Reporting'
-    },
-    navigationItems: {
-      type: Array,
-      default: () => [
-        {
-          name: 'Home',
-          to: '/',
-          label: 'Home',
-          icon: 'home'
-        },
-        {
-          name: 'Reports',
-          to: '/reports',
-          label: 'Reports',
-          icon: 'chart'
-        },
-        {
-          name: 'Settings',
-          to: '/settings',
-          label: 'Settings',
-          icon: 'settings'
-        }
-      ]
-    }
-  }
+interface NavigationItem {
+  name: string
+  to: string
+  label: string
+  icon: string
 }
+
+interface Props {
+  brandName?: string
+  navigationItems?: NavigationItem[]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  brandName: 'Simple Reporting',
+  navigationItems: () => [
+    {
+      name: 'Home',
+      to: '/',
+      label: 'Home',
+      icon: 'home'
+    },
+    {
+      name: 'Reports',
+      to: '/reports',
+      label: 'Reports',
+      icon: 'chart'
+    },
+    {
+      name: 'Settings',
+      to: '/settings',
+      label: 'Settings',
+      icon: 'settings'
+    }
+  ]
+})
 </script>
