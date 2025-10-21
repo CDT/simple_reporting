@@ -1,18 +1,30 @@
 <template>
   <div class="card">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="text-lg font-semibold text-gray-900">SQL Query Editor</h3>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900">SQL Query Editor</h3>
+        <StatusIndicator
+          v-if="activeConnection"
+          status="success"
+          :text="`Connected to: ${activeConnection.name} (${activeConnection.type.toUpperCase()})`"
+        />
+        <StatusIndicator
+          v-else
+          status="error"
+          text="No active connection. Please configure a connection in Settings."
+        />
+      </div>
       <div class="flex space-x-2">
         <button
           @click="loadTables"
-          :disabled="isLoading"
+          :disabled="isLoading || !activeConnection"
           class="btn btn-secondary text-sm"
         >
           Load Tables
         </button>
         <button
           @click="executeQuery"
-          :disabled="!sql.trim() || isLoading"
+          :disabled="!sql.trim() || isLoading || !activeConnection"
           class="btn btn-primary"
         >
           Execute Query
@@ -75,33 +87,34 @@
     </div>
 
     <!-- Error Display -->
-    <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-      <div class="flex items-center">
-        <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-        </svg>
-        <span class="text-sm text-red-700">{{ error }}</span>
-      </div>
-    </div>
+    <AlertMessage
+      v-if="error"
+      type="error"
+      :message="error"
+      class="mb-4"
+    />
 
     <!-- Success Message -->
-    <div v-if="successMessage" class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-      <div class="flex items-center">
-        <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-        </svg>
-        <span class="text-sm text-green-700">{{ successMessage }}</span>
-      </div>
-    </div>
+    <AlertMessage
+      v-if="successMessage"
+      type="success"
+      :message="successMessage"
+      class="mb-4"
+    />
   </div>
 </template>
 
 <script>
-import { ref, computed, inject } from 'vue'
+import { ref, computed, inject, onMounted } from 'vue'
 import axios from 'axios'
+import { StatusIndicator, AlertMessage } from './ui'
 
 export default {
   name: 'QueryEditor',
+  components: {
+    StatusIndicator,
+    AlertMessage
+  },
   emits: ['query-executed'],
   setup(props, { emit }) {
     const sql = ref('')
@@ -111,6 +124,7 @@ export default {
     const error = ref('')
     const successMessage = ref('')
     const isLoading = ref(false)
+    const activeConnection = ref(null)
 
     const setLoading = inject('setLoading')
 
@@ -129,13 +143,20 @@ export default {
 
     // Load available tables
     const loadTables = async () => {
+      if (!activeConnection.value) {
+        error.value = 'No active connection. Please configure a connection in Settings.'
+        return
+      }
+
       try {
         const response = await axios.get('/api/query/tables')
         if (response.data.success) {
           tables.value = response.data.tables
+          error.value = ''
         }
       } catch (err) {
         console.error('Error loading tables:', err)
+        error.value = err.response?.data?.message || 'Failed to load tables'
       }
     }
 
@@ -192,8 +213,24 @@ export default {
       }
     }
 
+    // Load active connection
+    const loadActiveConnection = async () => {
+      try {
+        const response = await axios.get('/api/connections')
+        if (response.data.success) {
+          const connections = response.data.connections
+          activeConnection.value = connections.find(c => c.isActive) || null
+        }
+      } catch (err) {
+        console.error('Error loading active connection:', err)
+      }
+    }
+
     // Load tables on component mount
-    loadTables()
+    onMounted(() => {
+      loadActiveConnection()
+      loadTables()
+    })
 
     return {
       sql,
@@ -203,6 +240,7 @@ export default {
       error,
       successMessage,
       isLoading,
+      activeConnection,
       loadTables,
       insertTableName,
       executeQuery,

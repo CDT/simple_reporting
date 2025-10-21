@@ -7,12 +7,11 @@
       </div>
     </div>
 
-    <div v-if="data.length === 0" class="text-center py-8 text-gray-500">
-      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-      <p class="mt-2">No data to display</p>
-    </div>
+    <EmptyState
+      v-if="data.length === 0"
+      title="No data to display"
+      icon="chart"
+    />
 
     <div v-else class="overflow-x-auto">
       <table class="table">
@@ -96,9 +95,13 @@
 
 <script>
 import { ref, computed, watch } from 'vue'
+import { EmptyState } from './ui'
 
 export default {
   name: 'ReportTable',
+  components: {
+    EmptyState
+  },
   props: {
     data: {
       type: Array,

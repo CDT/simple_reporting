@@ -6,11 +6,13 @@ import './style.css'
 // Import pages
 import Home from './pages/Home.vue'
 import Reports from './pages/Reports.vue'
+import Settings from './pages/Settings.vue'
 
 // Define routes
 const routes = [
   { path: '/', name: 'Home', component: Home },
-  { path: '/reports', name: 'Reports', component: Reports }
+  { path: '/reports', name: 'Reports', component: Reports },
+  { path: '/settings', name: 'Settings', component: Settings }
 ]
 
 // Create router

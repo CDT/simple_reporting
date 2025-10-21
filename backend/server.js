@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const queryRoutes = require('./routes/query');
 const exportRoutes = require('./routes/export');
+const connectionRoutes = require('./routes/connections');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/query', queryRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/connections', connectionRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

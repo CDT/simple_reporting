@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const database = require('../config/database');
+const databaseManager = require('../config/database-manager');
 
 // Execute SQL query
 router.post('/', async (req, res) => {
@@ -20,7 +20,7 @@ router.post('/', async (req, res) => {
     console.log('Executing query:', sql);
     console.log('Parameters:', params);
 
-    const results = await database.query(sql, params);
+    const results = await databaseManager.query(sql, params);
     
     res.json({
       success: true,
@@ -42,15 +42,11 @@ router.post('/', async (req, res) => {
 // Get available tables
 router.get('/tables', async (req, res) => {
   try {
-    const tables = await database.query(`
-      SELECT name FROM sqlite_master 
-      WHERE type='table' AND name NOT LIKE 'sqlite_%'
-      ORDER BY name
-    `);
+    const tables = await databaseManager.getTables();
     
     res.json({
       success: true,
-      tables: tables.map(t => t.name)
+      tables: tables
     });
   } catch (error) {
     console.error('Error fetching tables:', error);
@@ -67,17 +63,12 @@ router.get('/schema/:tableName', async (req, res) => {
   try {
     const { tableName } = req.params;
     
-    const schema = await database.query(`PRAGMA table_info(${tableName})`);
+    const schema = await databaseManager.getTableSchema(tableName);
     
     res.json({
       success: true,
       tableName,
-      columns: schema.map(col => ({
-        name: col.name,
-        type: col.type,
-        notNull: col.notnull === 1,
-        primaryKey: col.pk === 1
-      }))
+      columns: schema
     });
   } catch (error) {
     console.error('Error fetching schema:', error);
