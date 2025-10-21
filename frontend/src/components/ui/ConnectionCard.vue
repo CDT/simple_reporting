@@ -6,9 +6,7 @@
           class="w-10 h-10 rounded-lg flex items-center justify-center"
           :class="iconClass"
         >
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path :d="iconPath" />
-          </svg>
+          <DatabaseIcon class="w-5 h-5" />
         </div>
         <div>
           <h3 class="font-medium text-gray-900">{{ connection.name }}</h3>
@@ -51,8 +49,13 @@
 </template>
 
 <script>
+import { DatabaseIcon } from './icons'
+
 export default {
   name: 'ConnectionCard',
+  components: {
+    DatabaseIcon
+  },
   props: {
     connection: {
       type: Object,
@@ -89,10 +92,6 @@ export default {
       return this.connection.isActive 
         ? 'bg-green-100 text-green-800' 
         : 'bg-gray-100 text-gray-800'
-    },
-    iconPath() {
-      // Generic database icon - you can customize this per database type
-      return 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'
     }
   }
 }

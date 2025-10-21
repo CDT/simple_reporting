@@ -37,12 +37,12 @@
         <StepIndicator
           :step-number="1"
           title="Navigate to Reports"
-          description="Click on the \"Reports\" tab to access the query editor"
+          description="Click on the 'Reports' tab to access the query editor"
         />
         <StepIndicator
           :step-number="2"
           title="Write Your Query"
-          description="Enter your SQL query in the editor. Use the \"Load Tables\" button to see available tables"
+          description="Enter your SQL query in the editor. Use the 'Load Tables' button to see available tables"
         />
         <StepIndicator
           :step-number="3"

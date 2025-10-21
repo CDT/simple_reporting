@@ -14,9 +14,7 @@
           @click="showAddConnection = true"
           class="btn btn-primary"
         >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
+          <PlusIcon class="w-4 h-4 mr-2" />
           Add Connection
         </button>
       </div>
@@ -130,7 +128,7 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { EmptyState, ConnectionCard, Modal, FormField } from '../components/ui'
+import { EmptyState, ConnectionCard, Modal, FormField, PlusIcon } from '../components/ui'
 
 export default {
   name: 'Settings',
@@ -138,7 +136,8 @@ export default {
     EmptyState,
     ConnectionCard,
     Modal,
-    FormField
+    FormField,
+    PlusIcon
   },
   setup() {
     const connections = ref([])

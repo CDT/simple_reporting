@@ -26,22 +26,14 @@
               <div class="flex items-center space-x-1">
                 <span>{{ formatColumnName(column) }}</span>
                 <div class="flex flex-col">
-                  <svg 
+                  <ChevronUpIcon 
                     class="w-3 h-3 text-gray-400" 
                     :class="{ 'text-gray-600': sortColumn === column && sortDirection === 'asc' }"
-                    fill="currentColor" 
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                  </svg>
-                  <svg 
+                  />
+                  <ChevronDownIcon 
                     class="w-3 h-3 text-gray-400 -mt-1" 
                     :class="{ 'text-gray-600': sortColumn === column && sortDirection === 'desc' }"
-                    fill="currentColor" 
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
-                  </svg>
+                  />
                 </div>
               </div>
             </th>
@@ -95,12 +87,14 @@
 
 <script>
 import { ref, computed, watch } from 'vue'
-import { EmptyState } from './ui'
+import { EmptyState, ChevronUpIcon, ChevronDownIcon } from './ui'
 
 export default {
   name: 'ReportTable',
   components: {
-    EmptyState
+    EmptyState,
+    ChevronUpIcon,
+    ChevronDownIcon
   },
   props: {
     data: {

@@ -8,3 +8,6 @@ export { default as StepIndicator } from './StepIndicator.vue'
 export { default as CodeBlock } from './CodeBlock.vue'
 export { default as ConnectionCard } from './ConnectionCard.vue'
 export { default as FormField } from './FormField.vue'
+
+// Export all icons
+export * from './icons'

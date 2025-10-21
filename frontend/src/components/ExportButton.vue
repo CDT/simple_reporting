@@ -5,9 +5,7 @@
       :disabled="!hasData || isExporting"
       class="btn btn-success flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <svg v-if="!isExporting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
+      <DownloadIcon v-if="!isExporting" class="w-4 h-4" />
       <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
       <span>{{ isExporting ? 'Exporting...' : 'Export to Excel' }}</span>
     </button>
@@ -17,9 +15,7 @@
       :disabled="!hasData || isExporting"
       class="btn btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <svg v-if="!isExporting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
-      </svg>
+      <FormattedExportIcon v-if="!isExporting" class="w-4 h-4" />
       <div v-else class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
       <span>{{ isExporting ? 'Exporting...' : 'Export Formatted' }}</span>
     </button>
@@ -29,9 +25,14 @@
 <script>
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { DownloadIcon, FormattedExportIcon } from './ui/icons'
 
 export default {
   name: 'ExportButton',
+  components: {
+    DownloadIcon,
+    FormattedExportIcon
+  },
   props: {
     sql: {
       type: String,
