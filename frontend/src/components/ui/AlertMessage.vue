@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useIcon } from '../../composables/useIcon'
+import { resolveIcon } from '../../composables/useIcon'
 
 interface Props {
   type: 'success' | 'error' | 'warning' | 'info'
@@ -46,5 +46,5 @@ const textClass = computed<string>(() => {
 })
 
 // Use the icon utility
-const iconComponent = useIcon(props.type)
+const iconComponent = resolveIcon(props.type)
 </script>

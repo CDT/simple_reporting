@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useIcon } from '../../composables/useIcon'
+import { resolveIcon } from '../../composables/useIcon'
 
 interface Props {
   title: string
@@ -28,7 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 // Use the icon utility
-const iconComponent = useIcon(props.icon)
+const iconComponent = resolveIcon(props.icon)
 
 const iconBgClass = computed<string>(() => {
   const classes: Record<string, string> = {

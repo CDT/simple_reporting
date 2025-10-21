@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { useIcon } from '../../composables/useIcon'
+import { resolveIcon } from '../../composables/useIcon'
 
 interface Props {
   to: string
@@ -26,5 +26,5 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 // Use the icon utility
-const iconComponent = useIcon(props.icon)
+const iconComponent = resolveIcon(props.icon)
 </script>
