@@ -60,6 +60,8 @@ interface Connection {
   port: string
   database: string
   isActive: boolean
+  username: string
+  password: string
 }
 
 interface Props {

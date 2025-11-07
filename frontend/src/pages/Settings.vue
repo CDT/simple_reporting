@@ -10,13 +10,13 @@
     <div class="card">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-semibold text-gray-900">Database Connections</h2>
-        <button
+        <BaseButton
           @click="showAddConnection = true"
-          class="btn btn-primary"
+          variant="primary"
+          :icon="PlusIcon"
         >
-          <PlusIcon class="w-4 h-4 mr-2" />
           Add Connection
-        </button>
+        </BaseButton>
       </div>
 
       <!-- Connections List -->
@@ -47,16 +47,15 @@
       @close="cancelEdit"
     >
       <form @submit.prevent="saveConnection" class="space-y-4">
-          <FormField
+          <TextInput
             v-model="connectionForm.name"
             label="Connection Name"
             placeholder="e.g., Production Database"
             required
           />
 
-          <FormField
+          <SelectInput
             v-model="connectionForm.type"
-            type="select"
             label="Database Type"
             placeholder="Select database type"
             :options="[
@@ -68,13 +67,13 @@
           />
 
           <div class="grid grid-cols-2 gap-4">
-            <FormField
+            <TextInput
               v-model="connectionForm.host"
               label="Host"
               placeholder="localhost"
               required
             />
-            <FormField
+            <TextInput
               v-model="connectionForm.port"
               type="number"
               label="Port"
@@ -83,21 +82,21 @@
             />
           </div>
 
-          <FormField
+          <TextInput
             v-model="connectionForm.database"
             label="Database Name"
             placeholder="database_name"
             required
           />
 
-          <FormField
+          <TextInput
             v-model="connectionForm.username"
             label="Username"
             placeholder="username"
             required
           />
 
-          <FormField
+          <TextInput
             v-model="connectionForm.password"
             type="password"
             label="Password"
@@ -128,7 +127,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { EmptyState, ConnectionCard, Modal, FormField, PlusIcon } from '../components/ui'
+import { EmptyState, ConnectionCard, Modal, TextInput, SelectInput, BaseButton, PlusIcon } from '../components/ui'
 
 interface Connection {
   id: number
@@ -139,6 +138,7 @@ interface Connection {
   database: string
   username: string
   password: string
+  isActive: boolean
 }
 
 interface ConnectionForm {

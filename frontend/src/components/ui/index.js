@@ -7,7 +7,12 @@ export { default as FeatureCard } from './FeatureCard.vue'
 export { default as StepIndicator } from './StepIndicator.vue'
 export { default as CodeBlock } from './CodeBlock.vue'
 export { default as ConnectionCard } from './ConnectionCard.vue'
-export { default as FormField } from './FormField.vue'
+export { default as BaseButton } from './BaseButton.vue'
+
+// Form components
+export { default as TextInput } from './TextInput.vue'
+export { default as TextArea } from './TextArea.vue'
+export { default as SelectInput } from './SelectInput.vue'
 
 // Export all icons
 export * from './icons'
